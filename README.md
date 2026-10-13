@@ -1,3 +1,4 @@
+```
 STRUCTURE OF THE PROJECT:
 ├── API-Gateway_Microservice/ 
 │   ├── .dockerignore 
@@ -65,4 +66,4 @@ STRUCTURE OF THE PROJECT:
 │   ├── .nginxconf 
 │   └── Dockerfile 
 └── docker-compose.yml 
-
+```
