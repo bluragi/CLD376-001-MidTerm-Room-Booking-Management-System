@@ -45,26 +45,26 @@ function uniqueid(min, max) {
 //REG API
 app.post('/userregister', async (req, res) => {
     try {
-    // STEP 1: Check if email already exists
-    const existingUser = await PersonModel.findOne({ email: req.body.email });
-    if (existingUser) {
-        return res.status(409).send({ message: 'Email already registered' });
-    }
+        // STEP 1: Check if email already exists (schema field is emailid)
+        const existingUser = await PersonModel.findOne({ emailid: req.body.email });
+        if (existingUser) {
+            return res.status(409).send({ message: 'Email already registered' });
+        }
 
-    // STEP 2: Hash the password before storing
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        // STEP 2: Hash the password before storing
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    // STEP 3: Create and save the new user
-    const pobj = new PersonModel({
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword,
-        phone: req.body.phone,
-        role: req.body.role
+        // STEP 3: Create and save the new user
+        const pobj = new PersonModel({
+            name: req.body.name,
+            emailid: req.body.email,     // request field "email" -> schema field "emailid"
+            password: hashedPassword,
+            mobile: req.body.phone,      // request field "phone" -> schema field "mobile"
+            role: req.body.role
         });
 
-    const savedUser = await pobj.save();
-    res.status(200).send({ message: 'User registered successfully' });
+        await pobj.save();
+        res.status(201).send({ message: 'User registered successfully' });
 
     } catch (err) {
         res.status(500).send({ message: err.message || 'Error registering user' });
