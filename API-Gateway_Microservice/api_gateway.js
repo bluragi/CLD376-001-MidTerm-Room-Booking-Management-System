@@ -76,7 +76,7 @@ app.use('/auth', forward(LOGIN_URL));
 
 // REGISTRATION service
 app.use('/reg', (req, res, next) => {
-    if (req.method === 'POST' && req.path === '/register') return forward(REG_URL)(req, res);
+    if (req.method === 'POST' && req.path === '/userregister') return forward(REG_URL)(req, res);
     next();
 }, authToken, authRole({ GET: ['admin'], PUT: ['admin'], DELETE: ['admin'] }), forward(REG_URL));
 
