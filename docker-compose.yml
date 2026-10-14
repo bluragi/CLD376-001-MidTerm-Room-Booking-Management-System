@@ -1,47 +1,52 @@
 services:
-  redis:
-    container_name : redis_container
-    image: "redislabs/redismod"
-    ports:
-      - "6379:6379"
+  gateway:
+    build: ./API-Gateway_Microservice
+    ports: ["5000:5000"]
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      REG_URL: http://registration:5001
+      LOGIN_URL: http://login:5002
+      ROOM_URL: http://room:5003
+      BOOKING_URL: http://nginx:80
+      PAYMENT_URL: http://payment:5005
+      NOTIF_URL: http://notification:5006
+    depends_on: [registration, login, room, nginx, payment, notification]
     restart: on-failure
 
-  webserver1:
-    container_name : webserver1_container
-    build: 
-      context: ./webserver
-      dockerfile: Dockerfile
-    # hostname gives a container its internal machine name inside the Docker network.
-    # Without hostname Docker automatically assigns a random hostname:
-    hostname: web1
-    ports:
-      - "81:5001"
-    
+  registration:
+    build: ./Registration_Microservice
     restart: on-failure
-  
-  webserver2:
-    container_name : webserver2_container
-    build: 
-      context: ./webserver
-      dockerfile: Dockerfile
-    # hostname gives a container its internal machine name inside the Docker network.
-    # Without hostname Docker automatically assigns a random hostname
-    hostname: web2
-    ports:
-      - "82:5001"
+
+  login:
+    build: ./Authentication_Microservice
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+    restart: on-failure
+
+  room:
+    build: ./Room_Microservice
+    restart: on-failure
+
+  booking1: &booking
+    build: ./Booking_Microservice
+    environment:
+      ROOM_URL: http://room:5003
+      PAYMENT_URL: http://payment:5005
+      NOTIF_URL: http://notification:5006
+    restart: on-failure
+
+  booking2:
+    <<: *booking
+
+  payment:
+    build: ./Payment_Microservice
+    restart: on-failure
+
+  notification:
+    build: ./Notifications_Microservice
     restart: on-failure
 
   nginx:
-    container_name : nginx_container
-    build: 
-      context: ./nginx
-      dockerfile: Dockerfile
-    
-    ports:
-      - "80:80"
-    
+    build: ./nginx
+    depends_on: [booking1, booking2]
     restart: on-failure
-    
-    depends_on:
-      - webserver1
-      - webserver2

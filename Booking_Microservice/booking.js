@@ -6,8 +6,9 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json())
 app.use(express.json());
 
-const PAYMENT_SERVICE_URL = 'http://localhost:5005/paymentprocess';
-const NOTIFICATION_SERVICE_URL = 'http://localhost:5006/sendnotification';
+const ROOM_URL = process.env.ROOM_URL || 'http://localhost:5003';
+const PAYMENT_URL = process.env.PAYMENT_URL || 'http://localhost:5005';
+const NOTIF_URL = process.env.NOTIF_URL || 'http://localhost:5006';
 
 // Booking
 app.post('/bookroom', async (req, res) => {
