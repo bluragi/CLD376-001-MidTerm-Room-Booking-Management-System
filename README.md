@@ -1,5 +1,4 @@
 ```
-```
 CLD376-001-MidTerm-Room-Booking-Management-System/
     ├── API-Gateway_Microservice/
     │   ├── .dockerignore
@@ -70,5 +69,4 @@ CLD376-001-MidTerm-Room-Booking-Management-System/
     ├── .env
     ├── docker-compose.yml
     └── README.md
-```
 ```
