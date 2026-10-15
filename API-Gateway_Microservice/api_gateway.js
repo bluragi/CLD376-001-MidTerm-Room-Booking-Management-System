@@ -32,21 +32,21 @@ function authRole(rules) {
     return (req, res, next) => {
         const allowed = rules[req.method];
         if (!allowed || !allowed.includes(req.user.role)) {
-        return res.status(403).json({ message: 'Unauthorized: role not allowed' });
+            return res.status(403).json({ message: 'Unauthorized: role not allowed' });
         }
         next();
     };
 }
 
-// Same idea, but GET /my is for users and GET (everything else) is for admin
+// GET /my... is for users, any other GET is for admin
 function myOrAdmin(rules) {
     return (req, res, next) => {
         if (req.method === 'GET') {
-        const allowed = req.path.startsWith('/my') ? ['user'] : ['admin'];
-        if (!allowed.includes(req.user.role)) {
-            return res.status(403).json({ message: 'Unauthorized: role not allowed' });
-        }
-        return next();
+            const allowed = req.path.startsWith('/my') ? ['user'] : ['admin'];
+            if (!allowed.includes(req.user.role)) {
+                return res.status(403).json({ message: 'Unauthorized: role not allowed' });
+            }
+            return next();
         }
         return authRole(rules)(req, res, next);
     };
@@ -55,10 +55,10 @@ function myOrAdmin(rules) {
 function forward(target) {
     return (req, res) => {
         proxy.web(req, res, {
-        target,
-        headers: req.user
-            ? { 'x-user-id': req.user.id, 'x-user-email': req.user.email, 'x-user-role': req.user.role }
-            : {},
+            target,
+            headers: req.user
+                ? { 'x-user-id': req.user.id, 'x-user-email': req.user.email, 'x-user-role': req.user.role }
+                : {},
         });
     };
 }
@@ -74,7 +74,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', service: 'api-gateway'
 // LOGIN service
 app.use('/auth', forward(LOGIN_URL));
 
-// REGISTRATION service
+// REGISTRATION service (public: POST /reg/userregister)
 app.use('/reg', (req, res, next) => {
     if (req.method === 'POST' && req.path === '/userregister') return forward(REG_URL)(req, res);
     next();
@@ -91,9 +91,9 @@ app.use('/booking', authToken,
     myOrAdmin({ POST: ['user'], PUT: ['user', 'admin'], DELETE: ['admin'] }),
     forward(BOOKING_URL));
 
-// PAYMENT
+// PAYMENT (POST removed: payments are created only by the Booking service)
 app.use('/payment', authToken,
-    authRole({ POST: ['user'], GET: ['admin', 'user'], PUT: ['admin'], DELETE: ['admin'] }),
+    myOrAdmin({ PUT: ['admin'], DELETE: ['admin'] }),
     forward(PAYMENT_URL));
 
 // NOTIFICATION
